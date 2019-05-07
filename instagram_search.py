@@ -2,11 +2,14 @@ import json
 import logging as log
 import re
 import sys
+import sys
 from abc import ABCMeta, abstractmethod
 from json import JSONDecodeError
 
 import bs4
 import requests
+
+import re
 
 
 class InstagramUser:
@@ -110,7 +113,7 @@ class HashTagSearch(metaclass=ABCMeta):
 
         # figure out valid queryId
         success = False
-        print(potential_query_ids)
+        print(potential_query_ids, file=sys.stderr)
         for potential_id in potential_query_ids:
             variables = {
                 'tag_name': tag,
@@ -207,7 +210,7 @@ class HashTagSearch(metaclass=ABCMeta):
                 if "queryId" in text:
                     for query_id in re.findall("(?<=queryId:\")[0-9A-Za-z]+", text):
                         query_ids.append(query_id)
-        print(query_ids)
+        print(query_ids, file=sys.stderr)
         return query_ids
 
     @abstractmethod
@@ -227,9 +230,9 @@ class HashTagSearchExample(HashTagSearch):
         super().save_results(instagram_results)
         for i, post in enumerate(instagram_results):
             self.total_posts += 1
-            print("%i - %s" % (self.total_posts, post.processed_text()))
+            print("%s\t%s\t%s" % (post.display_src, post.processed_text(), post.user.id))
 
 
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
-    HashTagSearchExample().extract_recent_tag("christmas")
+    HashTagSearchExample().extract_recent_tag(sys.argv[1])
